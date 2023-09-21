@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProductsReviewWebAPI2.Data;
 using ProductsReviewWebAPI2.Models;
+using ProductsReviewWebAPI2.NewFolder;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -18,36 +20,40 @@ namespace ProductsReviewWebAPI2.Controllers
         }
         // GET: api/<ProductsController>
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult Get([FromQuery] int? maxPrice)
         {
             var products = _context.Products.ToList();
+            if (maxPrice != null)
+            {
+                products = products.Where(price => price.Price < maxPrice).ToList();
+            }
+
             return Ok(products);
         }
 
         // GET api/<ProductsController>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public IActionResult Get([FromQuery] int id)
         {
-            var product = _context.Products.Find(id);
+            var product = _context.Products
+                .Include(p => p.Reviews)
+                .FirstOrDefault(p => p.Id == id);
             if (product == null)
             {
                 return NotFound();
             }
-              
-            return Ok();
+            var productDTO = new ProductDTO
+            {
+                Id = product.Id,
+                Reviews = product.Reviews.Select(r => new ReviewDTO
+                {
+                    Id = r.Id,
+                    Rating = r.Rating,
+                }).ToList()
+            };              
+            return Ok(productDTO);
         }
-        // GET All Under $20  api/<ProductsController>/5 Optional Query Parameter called maxPrice
-        //[HttpGet("{id}")]
-        //public IActionResult Get(int id)
-        //{
-        //    var product = _context.Products.Find(id);
-        //    if (product == null)
-        //    {
-        //        return NotFound();
-        //    }
-            
-        //    return Ok();
-        //}
+        
 
         // POST api/<ProductsController>
         [HttpPost]

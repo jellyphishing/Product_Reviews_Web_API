@@ -13,7 +13,7 @@ namespace ProductsReviewWebAPI2.Models
         public double Price { get; set; }
         //Navigation Property
         public ICollection<Review> Reviews { get; set; }
-        public int ProductId { get; set; }
+        public int ProductId { get; internal set; }
     }
 }
 

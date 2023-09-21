@@ -51,8 +51,11 @@ namespace ProductsReviewWebAPI2.Controllers
 
         // POST api/<ProductsController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public IActionResult Post([FromBody] Product product)
         {
+            _context.Products.Add(product);
+            _context.SaveChanges();
+            return StatusCode(201, product);
         }
 
         // PUT api/<ProductsController>/5

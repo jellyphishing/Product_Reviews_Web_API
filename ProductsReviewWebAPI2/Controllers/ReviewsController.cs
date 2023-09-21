@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProductsReviewWebAPI2.Data;
 using ProductsReviewWebAPI2.Models;
+using ProductsReviewWebAPI2.NewFolder;
+using System.Reflection.Metadata.Ecma335;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,7 +23,7 @@ namespace ProductsReviewWebAPI2.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-           var reviews = _context.Reviews.ToList();
+            var reviews = _context.Reviews.ToList();
             return Ok(reviews);
         }
 
@@ -29,54 +32,67 @@ namespace ProductsReviewWebAPI2.Controllers
         public IActionResult Get(int id)
         {
             var review = _context.Reviews.Find(id);
-            if(review == null)
+            if (review == null)
             {
                 return NotFound();
             }
             return Ok(review);
         }
-
-        // POST api/<ReviewsController>
-        [HttpPost]
-        public IActionResult Post([FromBody] Review review)
+        // GETByProductId api/<ReviewsController>/5
+        [HttpGet("search/{productId}")]
+        public IActionResult GetByProductId(int productId)
         {
-            _context.Reviews.Add(review);
-            _context.SaveChanges();
-            return StatusCode(201, review);
+            var reviews = _context.Reviews.Where(r  => r.ProductId == productId).ToList();
+
+            return Ok(reviews);           
+            
+
         }
 
-        // PUT api/<ReviewsController>/5
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Review review)
-        {
-            var reviewToUpdate = _context.Reviews.Find(id);
-            if (reviewToUpdate == null)
+
+
+           // POST api/<ReviewsController>
+            [HttpPost]
+            public IActionResult Post([FromBody] Review review)
             {
-                return NotFound();
+                _context.Reviews.Add(review);
+                _context.SaveChanges();
+                return StatusCode(201, review);
             }
-            reviewToUpdate.Text = review.Text;
-            reviewToUpdate.Rating = review.Rating;
-            //reviewToUpdate.ProductId = review.ProductId;
-            //reviewToUpdate.Product = review.Product;
 
-            _context.Reviews.Update(reviewToUpdate);
-            _context.SaveChanges();
+            // PUT api/<ReviewsController>/5
+            [HttpPut("{id}")]
+            public IActionResult Put(int id, [FromBody] Review review)
+            {
+                var reviewToUpdate = _context.Reviews.Find(id);
+                if (reviewToUpdate == null)
+                {
+                    return NotFound();
+                }
+                reviewToUpdate.Text = review.Text;
+                reviewToUpdate.Rating = review.Rating;
+                //reviewToUpdate.ProductId = review.ProductId;
+                //reviewToUpdate.Product = review.Product;
 
-            return Ok(reviewToUpdate);
-        }
+                _context.Reviews.Update(reviewToUpdate);
+                _context.SaveChanges();
 
-        // DELETE api/<ReviewsController>/5
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            var review = _context.Reviews.Find(id);
-            if (review == null)
-            { 
-                return NotFound();
+                return Ok(reviewToUpdate);
             }
-            _context.Reviews.Remove(review);
-            _context.SaveChanges();
-            return NoContent();
-        }
+
+            // DELETE api/<ReviewsController>/5
+            [HttpDelete("{id}")]
+            public IActionResult Delete(int id)
+            {
+                var review = _context.Reviews.Find(id);
+                if (review == null)
+                {
+                    return NotFound();
+                }
+                _context.Reviews.Remove(review);
+                _context.SaveChanges();
+                return NoContent();
+            }
+        
     }
 }
